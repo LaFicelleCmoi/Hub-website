@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="DataSport Hub — accès direct aux environnements de données et tableaux de bord sportifs.">
+    <meta name="theme-color" content="#FAFAFA" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <title>DataSport Hub</title>
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111827'/%3E%3Cpath d='M9 21V11M16 21V14M23 21V9' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* =========================================================
+           Variables — couleurs + échelles fluides
+           ========================================================= */
+        :root {
+            /* Couleurs */
+            --bg-color: #FAFAFA;
+            --surface-color: #FFFFFF;
+            --border-color: #EAEAEA;
+            --border-hover: #D1D5DB;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --icon-color: #4B5563;
+
+            --shadow-hover: 0 4px 20px -6px rgba(0, 0, 0, 0.10);
+            --bento-rgb: 120, 90, 220;
+            --bento-spot: rgba(var(--bento-rgb), 0.06);
+            --bento-edge: rgba(var(--bento-rgb), 0.45);
+
+            --radius-card: 12px;
+            --radius-icon: 8px;
+            --transition-speed: 0.2s;
+            --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+            /* Échelles fluides — padding, gaps, marges.
+               Toutes les valeurs "respirent" entre un minimum mobile
+               et un maximum desktop, sans casser au breakpoint. */
+            --pad-x:          clamp(1rem,     4vw,   1.5rem);
+            --pad-y-top:      clamp(2.5rem,   8vw,   6rem);
+            --pad-y-bottom:   clamp(1.5rem,   4vw,   3rem);
+            --header-gap:     clamp(2rem,     5vw,   3.5rem);
+            --grid-gap:       clamp(0.75rem,  2vw,   1.5rem);
+            --card-pad:       clamp(1.125rem, 3vw,   1.5rem);
+            --card-head-gap:  clamp(0.875rem, 2.5vw, 1.25rem);
+
+            /* Échelles typographiques fluides.
+               h1 : 28px sur mobile → 40px sur desktop.
+               lead : 16px → 18px.
+               Le reste reste stable, la variation n'apporterait rien. */
+            --fs-h1:    clamp(1.75rem,  1rem + 1.5vw,  2.5rem);
+            --fs-lead:  clamp(1rem,     0.9rem + 0.35vw, 1.125rem);
+            --fs-card-title: 1.125rem;
+            --fs-card-body:  0.875rem;
+            --fs-tag:        0.6875rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+                --bg-color: #000000;
+                --surface-color: #0A0A0A;
+                --border-color: #222222;
+                --border-hover: #444444;
+                --text-main: #EDEDED;
+                --text-muted: #8F8F8F;
+                --icon-color: #A1A1AA;
+                --shadow-hover: 0 4px 20px -6px rgba(255, 255, 255, 0.04);
+                --bento-spot: rgba(var(--bento-rgb), 0.10);
+            }
+        }
+
+        @media (prefers-contrast: more) {
+            :root {
+                --border-color: #B8B8B8;
+                --border-hover: #6B7280;
+                --text-muted: #4B5563;
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --border-color: #4B4B4B;
+                    --border-hover: #888888;
+                    --text-muted: #B0B0B0;
+                }
+            }
+        }
+
+        /* =========================================================
+           Reset + base
+           ========================================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            letter-spacing: -0.011em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+
+            /* 100dvh gère la barre d'URL mobile qui apparaît/disparaît.
+               Fallback 100vh pour les navigateurs qui ne connaissent pas dvh. */
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            display: flex;
+            flex-direction: column;
+
+            /* clip évite le scroll horizontal sans créer un conteneur
+               de scroll (contrairement à hidden qui casse position: sticky). */
+            overflow-x: clip;
+        }
+
+        /* =========================================================
+           Dot Field (fond canvas)
+           ========================================================= */
+        #dotfield {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+            /* La taille intrinsèque est fixée par JS, mais on donne
+               une taille CSS de secours au cas où le JS n'aurait pas
+               encore tourné : plein viewport. */
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sur mobile, pointeur grossier, reduced-motion ou reduced-data,
+           on masque le canvas et on affiche un motif statique très léger.
+           Le JS synchronise son propre état avec ces mêmes règles. */
+        @media (hover: none), (max-width: 640px), (prefers-reduced-motion: reduce), (prefers-reduced-data: reduce) {
+            #dotfield { display: none; }
+        }
+
+        @media (hover: none), (max-width: 640px) {
+            body {
+                background-image: radial-gradient(
+                    circle at 1px 1px,
+                    rgba(120, 120, 140, 0.10) 1px,
+                    transparent 0
+                );
+                background-size: 18px 18px;
+            }
+        }
+
+        /* =========================================================
+           Skip link
+           ========================================================= */
+        .skip-link {
+            position: absolute;
+            left: max(1rem, env(safe-area-inset-left, 0px));
+            top: max(1rem, env(safe-area-inset-top, 0px));
+            padding: 0.5rem 0.875rem;
+            background: var(--text-main);
+            color: var(--bg-color);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transform: translateY(-200%);
+            transition: transform 0.15s ease;
+            z-index: 100;
+        }
+        .skip-link:focus { transform: translateY(0); }
+
+        /* =========================================================
+           Page wrapper — safe areas + padding fluide
+           ========================================================= */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1024px;
+            margin: 0 auto;
+            flex-grow: 1;
+
+            /* Le padding latéral prend le maximum entre notre échelle
+               fluide et l'encoche safe-area (iPhone en paysage). */
+            padding-left:   max(var(--pad-x), env(safe-area-inset-left, 0px));
+            padding-right:  max(var(--pad-x), env(safe-area-inset-right, 0px));
+            /* En haut/bas, on ajoute la safe-area au padding (addition
+               et non maximum : on veut que la safe-area "s'ajoute" au
+               rythme visuel, pas qu'elle le remplace). */
+            padding-top:    calc(var(--pad-y-top) + env(safe-area-inset-top, 0px));
+            padding-bottom: calc(var(--pad-y-bottom) + env(safe-area-inset-bottom, 0px));
+        }
+
+        /* =========================================================
+           Header
+           ========================================================= */
+        header {
+            margin-bottom: var(--header-gap);
+            max-width: 600px;
+        }
+
+        header h1 {
+            font-size: var(--fs-h1);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 0.75rem;
+            text-wrap: balance;
+            /* Empêche un mot trop long de déborder si l'utilisateur
+               zoome énormément ou si un titre contient une URL. */
+            overflow-wrap: break-word;
+        }
+
+        header p {
+            font-size: var(--fs-lead);
+            color: var(--text-muted);
+            font-weight: 400;
+            text-wrap: pretty;
+            overflow-wrap: break-word;
+        }
+
+        /* =========================================================
+           Grille
+           ========================================================= */
+        .grid {
+            list-style: none;
+            display: grid;
+            /* min(100%, 280px) : la colonne ne descend jamais sous
+               280px sur grand écran, mais si le viewport est plus
+               étroit que 280px (Galaxy Fold cover : 280px), elle
+               prend toute la largeur disponible. Zéro débordement. */
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+            gap: var(--grid-gap);
+        }
+
+        .grid > li {
+            /* Un grid item a un min-width implicite de auto — sur un
+               contenu long, ça peut dépasser la colonne. On remet à 0. */
+            min-width: 0;
+        }
+
+        /* =========================================================
+           Carte bento
+           ========================================================= */
+        .card {
+            --mx: 50%;
+            --my: 50%;
+            --bento-radius: 280px;
+
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 0;
+            padding: var(--card-pad);
+
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            text-decoration: none;
+            color: inherit;
+
+            isolation: isolate;
+            /* Retire le surlignage bleu au tap sur iOS/Android. */
+            -webkit-tap-highlight-color: transparent;
+            /* Réduit le délai de 300ms au tap sur certains navigateurs. */
+            touch-action: manipulation;
+
+            transition:
+                transform var(--transition-speed) var(--ease-out),
+                border-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease,
+                filter 0.1s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(
+                var(--bento-radius) circle at var(--mx) var(--my),
+                var(--bento-spot),
+                transparent 70%
+            );
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: radial-gradient(
+                var(--bento-radius) circle at var(--mx) var(--my),
+                var(--bento-edge),
+                transparent 65%
+            );
+            -webkit-mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0);
+                    mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+
+        /* Feedback de tap sur tactile : léger assombrissement.
+           Sur desktop, ce filter reste imperceptible. */
+        .card:active {
+            filter: brightness(0.98);
+        }
+        @media (prefers-color-scheme: dark) {
+            .card:active { filter: brightness(1.08); }
+        }
+
+        /* Focus clavier — toujours actif, indépendant du hover. */
+        .card:focus-visible {
+            outline: 2px solid var(--text-main);
+            outline-offset: 3px;
+        }
+        .card:focus-visible::before,
+        .card:focus-visible::after {
+            opacity: 1;
+        }
+
+        /* Hover : uniquement sur pointeur précis. Évite les états
+           "collés" sur tactile après un tap. */
+        @media (hover: hover) and (pointer: fine) {
+            .card:hover {
+                border-color: transparent;
+                box-shadow: var(--shadow-hover);
+            }
+            .card:hover::before,
+            .card:hover::after { opacity: 1; }
+            .card:hover .icon-wrapper {
+                color: var(--text-main);
+                border-color: var(--border-hover);
+            }
+            .card:hover .arrow-icon {
+                transform: translateX(4px) translateY(-4px);
+                color: var(--text-main);
+            }
+        }
+
+        /* Sur pointeur fin + reduce-motion : pas de translation. */
+        @media (prefers-reduced-motion: reduce) {
+            .card:active { filter: none; }
+        }
+
+        /* =========================================================
+           Ondulation au clic
+           ========================================================= */
+        .ripple {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            margin: -4px 0 0 -4px;
+            border-radius: 50%;
+            background: rgba(var(--bento-rgb), 0.35);
+            transform: scale(0);
+            opacity: 1;
+            pointer-events: none;
+            animation: ripple-out 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            /* Le ripple est contenu dans la carte. */
+            overflow: hidden;
+        }
+
+        @keyframes ripple-out {
+            to { transform: scale(28); opacity: 0; }
+        }
+
+        /* =========================================================
+           Contenu des cartes
+           ========================================================= */
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--card-head-gap);
+        }
+
+        .icon-wrapper {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-icon);
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--icon-color);
+            transition: color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+        }
+
+        .arrow-icon {
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: transform var(--transition-speed) var(--ease-out), color var(--transition-speed) ease;
+        }
+
+        .card h2 {
+            display: flex;
+            align-items: center;
+            /* Sur une carte très étroite (Galaxy Fold, ou zoom fort),
+               le tag passe à la ligne proprement au lieu de pousser. */
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-size: var(--fs-card-title);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+            text-wrap: balance;
+            overflow-wrap: break-word;
+        }
+
+        .card-tag {
+            font-size: var(--fs-tag);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .card p {
+            font-size: var(--fs-card-body);
+            color: var(--text-muted);
+            flex-grow: 1;
+            text-wrap: pretty;
+            /* Casse les mots vraiment trop longs (URL collée, etc.)
+               uniquement si nécessaire. */
+            overflow-wrap: break-word;
+        }
+
+        /* =========================================================
+           Apparition échelonnée
+           ========================================================= */
+        @media (prefers-reduced-motion: no-preference) {
+            .grid > li {
+                animation: fade-up 0.5s var(--ease-out) backwards;
+            }
+            .grid > li:nth-child(1) { animation-delay: 0ms; }
+            .grid > li:nth-child(2) { animation-delay: 50ms; }
+            .grid > li:nth-child(3) { animation-delay: 100ms; }
+            .grid > li:nth-child(4) { animation-delay: 150ms; }
+            .grid > li:nth-child(5) { animation-delay: 200ms; }
+        }
+
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        /* =========================================================
+           Breakpoint : écrans très étroits (Galaxy Fold cover, 280px)
+           ========================================================= */
+        @media (max-width: 360px) {
+            :root {
+                --pad-x: 0.875rem;
+                --card-pad: 1rem;
+                --fs-card-title: 1rem;
+                --fs-card-body: 0.8125rem;
+            }
+            .icon-wrapper {
+                width: 36px;
+                height: 36px;
+            }
+        }
+
+        /* =========================================================
+           Breakpoint : paysage court (iPhone en paysage, ~375x812 → 812x375)
+           La hauteur est précieuse, on comprime le rythme vertical.
+           ========================================================= */
+        @media (orientation: landscape) and (max-height: 500px) {
+            :root {
+                --pad-y-top: 1.75rem;
+                --pad-y-bottom: 1.25rem;
+                --header-gap: 1.5rem;
+            }
+            header h1 { font-size: 1.5rem; }
+            header p  { font-size: 0.9375rem; }
+            /* En paysage, 240px de min permet deux colonnes même
+               sur un petit téléphone tourné. */
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+            }
+        }
+
+        /* =========================================================
+           Breakpoint : tablette portrait (641 – 900px)
+           On garde le comportement auto-fill. Rien à faire de
+           spécifique — le min 280px bascule naturellement en 2 colonnes.
+           Cette règle est là pour tracer l'intention, même si elle
+           ne change rien visuellement.
+           ========================================================= */
+        @media (min-width: 641px) and (max-width: 900px) {
+            /* Rien — la grille auto-fill fait déjà le travail. */
+        }
+
+        /* =========================================================
+           Très grands écrans — la grille ne dépasse pas 3 colonnes,
+           mais on garde le container à 1024px pour la lisibilité du
+           header. Rien à faire : le max-width du wrapper plafonne.
+           ========================================================= */
+
+        /* =========================================================
+           Reduced motion : on coupe tout ce qui bouge
+           ========================================================= */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+            }
+            .ripple { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="dotfield" aria-hidden="true"></canvas>
+
+    <a href="#main" class="skip-link">Aller au contenu</a>
+
+    <div class="page-wrapper">
+        <header>
+            <h1>DataSport Hub</h1>
+            <p>Accès direct à vos environnements de données et tableaux de bord sportifs.</p>
+        </header>
+
+        <main id="main">
+            <ul class="grid">
+
+                <li>
+                    <a href="https://f1-2026-gamma.vercel.app" class="card" target="_blank" rel="noopener noreferrer">
+                        <div class="card-header">
+                            <div class="icon-wrapper" aria-hidden="true">
+                                <i data-lucide="flag"></i>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="arrow-icon" width="20" height="20" aria-hidden="true"></i>
+                        </div>
+                        <h2>Formule 1 <span class="card-tag">2026</span></h2>
+                        <p>Statistiques, classements et données télémétriques de la saison.</p>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="https://cdm-hazel.vercel.app/dashboard.html" class="card" target="_blank" rel="noopener noreferrer">
+                        <div class="card-header">
+                            <div class="icon-wrapper" aria-hidden="true">
+                                <i data-lucide="globe-2"></i>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="arrow-icon" width="20" height="20" aria-hidden="true"></i>
+                        </div>
+                        <h2>Coupe du Monde <span class="card-tag">Tournoi</span></h2>
+                        <p>Tableau de bord complet des performances internationales.</p>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="https://ldc-2026-2027.vercel.app" class="card" target="_blank" rel="noopener noreferrer">
+                        <div class="card-header">
+                            <div class="icon-wrapper" aria-hidden="true">
+                                <i data-lucide="trophy"></i>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="arrow-icon" width="20" height="20" aria-hidden="true"></i>
+                        </div>
+                        <h2>Ligue des Champions <span class="card-tag">2026-2027</span></h2>
+                        <p>Suivi détaillé de la compétition européenne 2026-2027.</p>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="https://league-hub-teal.vercel.app" class="card" target="_blank" rel="noopener noreferrer">
+                        <div class="card-header">
+                            <div class="icon-wrapper" aria-hidden="true">
+                                <i data-lucide="network"></i>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="arrow-icon" width="20" height="20" aria-hidden="true"></i>
+                        </div>
+                        <h2>League Hub <span class="card-tag">Multi-ligues</span></h2>
+                        <p>Portail centralisé pour l'administration des différentes ligues.</p>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="https://nba-hub-ten.vercel.app" class="card" target="_blank" rel="noopener noreferrer">
+                        <div class="card-header">
+                            <div class="icon-wrapper" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"></path>
+                                    <path d="M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10"></path>
+                                </svg>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="arrow-icon" width="20" height="20" aria-hidden="true"></i>
+                        </div>
+                        <h2>NBA Hub <span class="card-tag">Franchises</span></h2>
+                        <p>Analytique et suivi des franchises de basketball nord-américain.</p>
+                    </a>
+                </li>
+
+            </ul>
+        </main>
+    </div>
+
+    <script>
+        /* =========================================================
+           1. Lucide — garde-fou
+           ========================================================= */
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+
+        /* =========================================================
+           2. Dot Field — canvas avec cycle de vie propre
+           S'active et se coupe selon la taille du viewport, le type
+           de pointeur et les préférences utilisateur. Réagit aux
+           changements de ces conditions en cours de session.
+           ========================================================= */
+        (function () {
+            var canvas = document.getElementById('dotfield');
+            if (!canvas) return;
+
+            var ctx = canvas.getContext('2d');
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            // Trois media queries surveillées en permanence.
+            var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+            var mqHover  = window.matchMedia('(hover: none)');
+            var mqData   = window.matchMedia('(prefers-reduced-data: reduce)');
+
+            // Paramètres du rendu.
+            var SPACING = 18, RADIUS = 1.2;
+            var BULGE = 55, PUSH = 5, GLOW_RADIUS = 200;
+            var SPOTLIGHT_RGB = [120, 90, 220];
+            var GRAD_FROM = [120, 120, 140, 0.10];
+            var GRAD_TO   = [180, 180, 200, 0.06];
+
+            var width = 0, height = 0, dots = [];
+            var tx = -9999, ty = -9999, mx = -9999, my = -9999;
+            var running = false, rafId = 0;
+
+            function shouldRun() {
+                return !mqReduce.matches
+                    && !mqHover.matches
+                    && !mqData.matches
+                    && window.innerWidth > 640;
+            }
+
+            function lerp(a, b, k) { return a + (b - a) * k; }
+
+            function buildDots() {
+                var cols = Math.ceil(width / SPACING) + 1;
+                var rows = Math.ceil(height / SPACING) + 1;
+                dots = new Array(cols * rows);
+                var i = 0;
+                for (var y = 0; y < rows; y++) {
+                    for (var x = 0; x < cols; x++) {
+                        var bx = x * SPACING;
+                        var by = y * SPACING;
+                        dots[i++] = {
+                            bx: bx, by: by,
+                            t: by / Math.max(height, 1),
+                            px: bx, py: by
+                        };
+                    }
+                }
+            }
+
+            function resize() {
+                // clientWidth exclut la scrollbar (contrairement à innerWidth),
+                // ce qui évite un léger débordement à droite sur desktop.
+                width = document.documentElement.clientWidth;
+                height = window.innerHeight;
+                canvas.width = Math.round(width * dpr);
+                canvas.height = Math.round(height * dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                buildDots();
+            }
+
+            function frame() {
+                if (!running) { rafId = 0; return; }
+
+                mx = lerp(mx, tx, 0.15);
+                my = lerp(my, ty, 0.15);
+
+                ctx.clearRect(0, 0, width, height);
+
+                var g = ctx.createRadialGradient(mx, my, 0, mx, my, GLOW_RADIUS);
+                g.addColorStop(0, 'rgba(' + SPOTLIGHT_RGB.join(',') + ', 0.08)');
+                g.addColorStop(1, 'rgba(' + SPOTLIGHT_RGB.join(',') + ', 0)');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, width, height);
+
+                var fr = GRAD_FROM[0], fg = GRAD_FROM[1], fb = GRAD_FROM[2], fa = GRAD_FROM[3];
+                var tr = GRAD_TO[0],   tg = GRAD_TO[1],   tb = GRAD_TO[2],   ta = GRAD_TO[3];
+                var bulge2 = BULGE * BULGE;
+
+                for (var i = 0; i < dots.length; i++) {
+                    var d = dots[i];
+                    var dx = d.bx - mx;
+                    var dy = d.by - my;
+                    var dist2 = dx * dx + dy * dy;
+                    var falloff = dist2 < bulge2 ? 1 - dist2 / bulge2 : 0;
+
+                    var offX = 0, offY = 0;
+                    if (falloff > 0) {
+                        var dist = Math.sqrt(dist2) || 1;
+                        var push = falloff * PUSH;
+                        offX = (dx / dist) * push;
+                        offY = (dy / dist) * push;
+                    }
+
+                    d.px = lerp(d.px, d.bx + offX, 0.25);
+                    d.py = lerp(d.py, d.by + offY, 0.25);
+
+                    var r = fr + (tr - fr) * d.t;
+                    var gg = fg + (tg - fg) * d.t;
+                    var b = fb + (tb - fb) * d.t;
+                    var a = fa + (ta - fa) * d.t;
+                    var alpha = a * (0.6 + falloff * 0.4);
+                    var radius = RADIUS * (1 + falloff * 1.4);
+
+                    ctx.fillStyle = 'rgba(' +
+                        (r | 0) + ',' + (gg | 0) + ',' + (b | 0) + ',' + alpha.toFixed(3) + ')';
+                    ctx.beginPath();
+                    ctx.arc(d.px, d.py, radius, 0, 6.2831853);
+                    ctx.fill();
+                }
+
+                rafId = requestAnimationFrame(frame);
+            }
+
+            function start() {
+                if (running) return;
+                running = true;
+                resize();
+                rafId = requestAnimationFrame(frame);
+            }
+
+            function stop() {
+                if (!running) return;
+                running = false;
+                if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+                ctx.clearRect(0, 0, width, height);
+            }
+
+            /* Point d'entrée unique : lit l'état des media queries et
+               démarre, arrête, ou redimensionne en conséquence. */
+            function sync() {
+                if (shouldRun()) {
+                    if (running) resize();
+                    else start();
+                } else {
+                    stop();
+                }
+            }
+
+            // Curseur — toujours écouté, même quand le canvas est caché,
+            // pour que la position soit à jour au prochain démarrage.
+            window.addEventListener('pointermove', function (e) {
+                tx = e.clientX;
+                ty = e.clientY;
+            }, { passive: true });
+
+            window.addEventListener('pointerleave', function () {
+                tx = -9999;
+                ty = -9999;
+            });
+
+            // Resize debouncé : évite de redimensionner 60 fois pendant
+            // un drag de fenêtre, et absorbe les changements de barre d'URL iOS.
+            var resizeTimer;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(sync, 150);
+            });
+
+            // Réagit aux changements de media query en cours de session
+            // (l'utilisateur active reduced-motion dans les réglages système).
+            function watch(mq, cb) {
+                if (mq.addEventListener) mq.addEventListener('change', cb);
+                else mq.addListener(cb); // anciens navigateurs
+            }
+            watch(mqReduce, sync);
+            watch(mqHover, sync);
+            watch(mqData, sync);
+
+            // Premier démarrage.
+            sync();
+        })();
+
+        /* =========================================================
+           3. Magic Bento — spotlight, lueur, magnétisme, ripple
+           Les effets de curseur ne s'activent que sur pointeur fin.
+           Le ripple est universel (sauf reduced-motion).
+           ========================================================= */
+        (function () {
+            var hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+            var reduceMotion   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            var cards = document.querySelectorAll('.card');
+
+            function lerp(a, b, k) { return a + (b - a) * k; }
+
+            cards.forEach(function (card) {
+                // --- Effets de curseur (desktop uniquement) ---
+                if (hasFinePointer && !reduceMotion) {
+                    var rect = null;
+                    var rafId = 0;
+                    var targetX = 0, targetY = 0;
+                    var currentX = 0, currentY = 0;
+
+                    function tick() {
+                        currentX = lerp(currentX, targetX, 0.15);
+                        currentY = lerp(currentY, targetY, 0.15);
+
+                        card.style.setProperty('--bento-tx', currentX.toFixed(2) + 'px');
+                        card.style.setProperty('--bento-ty', currentY.toFixed(2) + 'px');
+
+                        if (Math.abs(currentX - targetX) > 0.05 ||
+                            Math.abs(currentY - targetY) > 0.05) {
+                            rafId = requestAnimationFrame(tick);
+                        } else {
+                            rafId = 0;
+                        }
+                    }
+
+                    function startTick() {
+                        if (!rafId) rafId = requestAnimationFrame(tick);
+                    }
+
+                    card.addEventListener('pointerenter', function () {
+                        rect = card.getBoundingClientRect();
+                    });
+
+                    card.addEventListener('pointermove', function (e) {
+                        if (!rect) rect = card.getBoundingClientRect();
+                        var x = e.clientX - rect.left;
+                        var y = e.clientY - rect.top;
+
+                        card.style.setProperty('--mx', x + 'px');
+                        card.style.setProperty('--my', y + 'px');
+
+                        var relX = (x / rect.width  - 0.5) * 2;
+                        var relY = (y / rect.height - 0.5) * 2;
+                        targetX = relX * 3;
+                        targetY = relY * 3;
+
+                        startTick();
+                    });
+
+                    card.addEventListener('pointerleave', function () {
+                        rect = null;
+                        targetX = 0;
+                        targetY = 0;
+                        startTick();
+
+                        card.style.setProperty('--mx', '50%');
+                        card.style.setProperty('--my', '50%');
+                    });
+                }
+
+                // --- Ripple au clic (toutes plateformes sauf reduced-motion) ---
+                card.addEventListener('click', function (e) {
+                    if (reduceMotion) return;
+
+                    var r = card.getBoundingClientRect();
+                    var ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.left = (e.clientX - r.left) + 'px';
+                    ripple.style.top  = (e.clientY - r.top)  + 'px';
+                    card.appendChild(ripple);
+
+                    setTimeout(function () {
+                        if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
+                    }, 700);
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

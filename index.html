@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
     <meta name="color-scheme" content="light dark">
-    <meta name="description" content="DataSport Hub — accès direct aux environnements de données et tableaux de bord sportifs.">
+    <meta name="description" content="DataSport Hub — environnements de données sportives et projets annexes.">
     <meta name="theme-color" content="#FAFAFA" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <title>DataSport Hub</title>
@@ -19,11 +19,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* =========================================================
-           Variables — couleurs + échelles fluides
-           ========================================================= */
         :root {
-            /* Couleurs */
             --bg-color: #FAFAFA;
             --surface-color: #FFFFFF;
             --border-color: #EAEAEA;
@@ -42,9 +38,6 @@
             --transition-speed: 0.2s;
             --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
-            /* Échelles fluides — padding, gaps, marges.
-               Toutes les valeurs "respirent" entre un minimum mobile
-               et un maximum desktop, sans casser au breakpoint. */
             --pad-x:          clamp(1rem,     4vw,   1.5rem);
             --pad-y-top:      clamp(2.5rem,   8vw,   6rem);
             --pad-y-bottom:   clamp(1.5rem,   4vw,   3rem);
@@ -52,12 +45,10 @@
             --grid-gap:       clamp(0.75rem,  2vw,   1.5rem);
             --card-pad:       clamp(1.125rem, 3vw,   1.5rem);
             --card-head-gap:  clamp(0.875rem, 2.5vw, 1.25rem);
+            --section-gap:    clamp(3rem,     7vw,   5rem);
 
-            /* Échelles typographiques fluides.
-               h1 : 28px sur mobile → 40px sur desktop.
-               lead : 16px → 18px.
-               Le reste reste stable, la variation n'apporterait rien. */
             --fs-h1:    clamp(1.75rem,  1rem + 1.5vw,  2.5rem);
+            --fs-h2:    clamp(1.125rem, 1rem + 0.5vw,  1.375rem);
             --fs-lead:  clamp(1rem,     0.9rem + 0.35vw, 1.125rem);
             --fs-card-title: 1.125rem;
             --fs-card-body:  0.875rem;
@@ -94,9 +85,6 @@
             }
         }
 
-        /* =========================================================
-           Reset + base
-           ========================================================= */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { -webkit-text-size-adjust: 100%; }
 
@@ -108,39 +96,24 @@
             letter-spacing: -0.011em;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-
-            /* 100dvh gère la barre d'URL mobile qui apparaît/disparaît.
-               Fallback 100vh pour les navigateurs qui ne connaissent pas dvh. */
             min-height: 100vh;
             min-height: 100dvh;
-
             display: flex;
             flex-direction: column;
-
-            /* clip évite le scroll horizontal sans créer un conteneur
-               de scroll (contrairement à hidden qui casse position: sticky). */
             overflow-x: clip;
         }
 
-        /* =========================================================
-           Dot Field (fond canvas)
-           ========================================================= */
+        /* ---------- Dot Field ---------- */
         #dotfield {
             position: fixed;
             inset: 0;
             z-index: 0;
             pointer-events: none;
             display: block;
-            /* La taille intrinsèque est fixée par JS, mais on donne
-               une taille CSS de secours au cas où le JS n'aurait pas
-               encore tourné : plein viewport. */
             width: 100%;
             height: 100%;
         }
 
-        /* Sur mobile, pointeur grossier, reduced-motion ou reduced-data,
-           on masque le canvas et on affiche un motif statique très léger.
-           Le JS synchronise son propre état avec ces mêmes règles. */
         @media (hover: none), (max-width: 640px), (prefers-reduced-motion: reduce), (prefers-reduced-data: reduce) {
             #dotfield { display: none; }
         }
@@ -156,9 +129,7 @@
             }
         }
 
-        /* =========================================================
-           Skip link
-           ========================================================= */
+        /* ---------- Skip link ---------- */
         .skip-link {
             position: absolute;
             left: max(1rem, env(safe-area-inset-left, 0px));
@@ -176,9 +147,7 @@
         }
         .skip-link:focus { transform: translateY(0); }
 
-        /* =========================================================
-           Page wrapper — safe areas + padding fluide
-           ========================================================= */
+        /* ---------- Wrapper ---------- */
         .page-wrapper {
             position: relative;
             z-index: 1;
@@ -186,21 +155,13 @@
             max-width: 1024px;
             margin: 0 auto;
             flex-grow: 1;
-
-            /* Le padding latéral prend le maximum entre notre échelle
-               fluide et l'encoche safe-area (iPhone en paysage). */
             padding-left:   max(var(--pad-x), env(safe-area-inset-left, 0px));
             padding-right:  max(var(--pad-x), env(safe-area-inset-right, 0px));
-            /* En haut/bas, on ajoute la safe-area au padding (addition
-               et non maximum : on veut que la safe-area "s'ajoute" au
-               rythme visuel, pas qu'elle le remplace). */
             padding-top:    calc(var(--pad-y-top) + env(safe-area-inset-top, 0px));
             padding-bottom: calc(var(--pad-y-bottom) + env(safe-area-inset-bottom, 0px));
         }
 
-        /* =========================================================
-           Header
-           ========================================================= */
+        /* ---------- Header principal ---------- */
         header {
             margin-bottom: var(--header-gap);
             max-width: 600px;
@@ -213,8 +174,6 @@
             line-height: 1.15;
             margin-bottom: 0.75rem;
             text-wrap: balance;
-            /* Empêche un mot trop long de déborder si l'utilisateur
-               zoome énormément ou si un titre contient une URL. */
             overflow-wrap: break-word;
         }
 
@@ -226,29 +185,17 @@
             overflow-wrap: break-word;
         }
 
-        /* =========================================================
-           Grille
-           ========================================================= */
+        /* ---------- Grille ---------- */
         .grid {
             list-style: none;
             display: grid;
-            /* min(100%, 280px) : la colonne ne descend jamais sous
-               280px sur grand écran, mais si le viewport est plus
-               étroit que 280px (Galaxy Fold cover : 280px), elle
-               prend toute la largeur disponible. Zéro débordement. */
             grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
             gap: var(--grid-gap);
         }
 
-        .grid > li {
-            /* Un grid item a un min-width implicite de auto — sur un
-               contenu long, ça peut dépasser la colonne. On remet à 0. */
-            min-width: 0;
-        }
+        .grid > li { min-width: 0; }
 
-        /* =========================================================
-           Carte bento
-           ========================================================= */
+        /* ---------- Carte bento ---------- */
         .card {
             --mx: 50%;
             --my: 50%;
@@ -268,9 +215,7 @@
             color: inherit;
 
             isolation: isolate;
-            /* Retire le surlignage bleu au tap sur iOS/Android. */
             -webkit-tap-highlight-color: transparent;
-            /* Réduit le délai de 300ms au tap sur certains navigateurs. */
             touch-action: manipulation;
 
             transition:
@@ -320,27 +265,18 @@
             pointer-events: none;
         }
 
-        /* Feedback de tap sur tactile : léger assombrissement.
-           Sur desktop, ce filter reste imperceptible. */
-        .card:active {
-            filter: brightness(0.98);
-        }
+        .card:active { filter: brightness(0.98); }
         @media (prefers-color-scheme: dark) {
             .card:active { filter: brightness(1.08); }
         }
 
-        /* Focus clavier — toujours actif, indépendant du hover. */
         .card:focus-visible {
             outline: 2px solid var(--text-main);
             outline-offset: 3px;
         }
         .card:focus-visible::before,
-        .card:focus-visible::after {
-            opacity: 1;
-        }
+        .card:focus-visible::after { opacity: 1; }
 
-        /* Hover : uniquement sur pointeur précis. Évite les états
-           "collés" sur tactile après un tap. */
         @media (hover: hover) and (pointer: fine) {
             .card:hover {
                 border-color: transparent;
@@ -358,14 +294,11 @@
             }
         }
 
-        /* Sur pointeur fin + reduce-motion : pas de translation. */
         @media (prefers-reduced-motion: reduce) {
             .card:active { filter: none; }
         }
 
-        /* =========================================================
-           Ondulation au clic
-           ========================================================= */
+        /* ---------- Ripple ---------- */
         .ripple {
             position: absolute;
             width: 8px;
@@ -377,7 +310,6 @@
             opacity: 1;
             pointer-events: none;
             animation: ripple-out 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            /* Le ripple est contenu dans la carte. */
             overflow: hidden;
         }
 
@@ -385,9 +317,7 @@
             to { transform: scale(28); opacity: 0; }
         }
 
-        /* =========================================================
-           Contenu des cartes
-           ========================================================= */
+        /* ---------- Contenu des cartes ---------- */
         .card-header {
             display: flex;
             align-items: center;
@@ -418,8 +348,6 @@
         .card h2 {
             display: flex;
             align-items: center;
-            /* Sur une carte très étroite (Galaxy Fold, ou zoom fort),
-               le tag passe à la ligne proprement au lieu de pousser. */
             flex-wrap: wrap;
             gap: 0.5rem;
             font-size: var(--fs-card-title);
@@ -447,9 +375,73 @@
             color: var(--text-muted);
             flex-grow: 1;
             text-wrap: pretty;
-            /* Casse les mots vraiment trop longs (URL collée, etc.)
-               uniquement si nécessaire. */
             overflow-wrap: break-word;
+        }
+
+        /* =========================================================
+           Section secondaire — « Autres projets »
+           Distincte visuellement, cohérente dans le langage.
+           ========================================================= */
+        .section-divider {
+            margin-top: var(--section-gap);
+            padding-top: clamp(2rem, 4vw, 3rem);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            margin-bottom: clamp(1.25rem, 3vw, 2rem);
+            max-width: 600px;
+        }
+
+        .section-header h2 {
+            font-size: var(--fs-h2);
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            color: var(--text-main);
+        }
+
+        /* Petit trait décoratif avant le titre de section — très discret */
+        .section-header h2::before {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 1px;
+            background: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .section-header p {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            padding-left: calc(14px + 0.625rem);
+            text-wrap: pretty;
+        }
+
+        /* La grille de projets est légèrement plus compacte */
+        .grid--projects {
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+        }
+
+        .grid--projects .card {
+            padding: clamp(1rem, 2.5vw, 1.25rem);
+        }
+
+        .grid--projects .icon-wrapper {
+            width: 36px;
+            height: 36px;
+        }
+
+        .grid--projects .card-header {
+            margin-bottom: 0.875rem;
+        }
+
+        .grid--projects .card h2 {
+            font-size: 1rem;
         }
 
         /* =========================================================
@@ -464,6 +456,8 @@
             .grid > li:nth-child(3) { animation-delay: 100ms; }
             .grid > li:nth-child(4) { animation-delay: 150ms; }
             .grid > li:nth-child(5) { animation-delay: 200ms; }
+
+            .grid--projects > li:nth-child(1) { animation-delay: 300ms; }
         }
 
         @keyframes fade-up {
@@ -472,7 +466,7 @@
         }
 
         /* =========================================================
-           Breakpoint : écrans très étroits (Galaxy Fold cover, 280px)
+           Breakpoints
            ========================================================= */
         @media (max-width: 360px) {
             :root {
@@ -487,45 +481,20 @@
             }
         }
 
-        /* =========================================================
-           Breakpoint : paysage court (iPhone en paysage, ~375x812 → 812x375)
-           La hauteur est précieuse, on comprime le rythme vertical.
-           ========================================================= */
         @media (orientation: landscape) and (max-height: 500px) {
             :root {
                 --pad-y-top: 1.75rem;
                 --pad-y-bottom: 1.25rem;
                 --header-gap: 1.5rem;
+                --section-gap: 2rem;
             }
             header h1 { font-size: 1.5rem; }
             header p  { font-size: 0.9375rem; }
-            /* En paysage, 240px de min permet deux colonnes même
-               sur un petit téléphone tourné. */
             .grid {
                 grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
             }
         }
 
-        /* =========================================================
-           Breakpoint : tablette portrait (641 – 900px)
-           On garde le comportement auto-fill. Rien à faire de
-           spécifique — le min 280px bascule naturellement en 2 colonnes.
-           Cette règle est là pour tracer l'intention, même si elle
-           ne change rien visuellement.
-           ========================================================= */
-        @media (min-width: 641px) and (max-width: 900px) {
-            /* Rien — la grille auto-fill fait déjà le travail. */
-        }
-
-        /* =========================================================
-           Très grands écrans — la grille ne dépasse pas 3 colonnes,
-           mais on garde le container à 1024px pour la lisibilité du
-           header. Rien à faire : le max-width du wrapper plafonne.
-           ========================================================= */
-
-        /* =========================================================
-           Reduced motion : on coupe tout ce qui bouge
-           ========================================================= */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -550,7 +519,11 @@
         </header>
 
         <main id="main">
-            <ul class="grid">
+
+            <!-- ============================================
+                 Section principale — environnements sportifs
+                 ============================================ -->
+            <ul class="grid" aria-label="Environnements sportifs">
 
                 <li>
                     <a href="https://f1-2026-gamma.vercel.app" class="card" target="_blank" rel="noopener noreferrer">
@@ -626,6 +599,34 @@
                 </li>
 
             </ul>
+
+            <!-- ============================================
+                 Section secondaire — autres projets
+                 ============================================ -->
+            <section class="section-divider" aria-labelledby="projects-title">
+                <div class="section-header">
+                    <h2 id="projects-title">Autres projets</h2>
+                    <p>Expérimentations et side projects hors du périmètre sportif.</p>
+                </div>
+
+                <ul class="grid grid--projects">
+
+                    <li>
+                        <a href="https://casino-black-rust.vercel.app/#/" class="card" target="_blank" rel="noopener noreferrer">
+                            <div class="card-header">
+                                <div class="icon-wrapper" aria-hidden="true">
+                                    <i data-lucide="dice-5"></i>
+                                </div>
+                                <i data-lucide="arrow-up-right" class="arrow-icon" width="20" height="20" aria-hidden="true"></i>
+                            </div>
+                            <h2>Casino Engine <span class="card-tag">Jeux</span></h2>
+                            <p>Moteur de jeux de casino — Blackjack, Roulette, Plinko, Mines et variantes.</p>
+                        </a>
+                    </li>
+
+                </ul>
+            </section>
+
         </main>
     </div>
 
@@ -639,9 +640,6 @@
 
         /* =========================================================
            2. Dot Field — canvas avec cycle de vie propre
-           S'active et se coupe selon la taille du viewport, le type
-           de pointeur et les préférences utilisateur. Réagit aux
-           changements de ces conditions en cours de session.
            ========================================================= */
         (function () {
             var canvas = document.getElementById('dotfield');
@@ -650,12 +648,10 @@
             var ctx = canvas.getContext('2d');
             var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-            // Trois media queries surveillées en permanence.
             var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
             var mqHover  = window.matchMedia('(hover: none)');
             var mqData   = window.matchMedia('(prefers-reduced-data: reduce)');
 
-            // Paramètres du rendu.
             var SPACING = 18, RADIUS = 1.2;
             var BULGE = 55, PUSH = 5, GLOW_RADIUS = 200;
             var SPOTLIGHT_RGB = [120, 90, 220];
@@ -694,8 +690,6 @@
             }
 
             function resize() {
-                // clientWidth exclut la scrollbar (contrairement à innerWidth),
-                // ce qui évite un léger débordement à droite sur desktop.
                 width = document.documentElement.clientWidth;
                 height = window.innerHeight;
                 canvas.width = Math.round(width * dpr);
@@ -773,8 +767,6 @@
                 ctx.clearRect(0, 0, width, height);
             }
 
-            /* Point d'entrée unique : lit l'état des media queries et
-               démarre, arrête, ou redimensionne en conséquence. */
             function sync() {
                 if (shouldRun()) {
                     if (running) resize();
@@ -784,8 +776,6 @@
                 }
             }
 
-            // Curseur — toujours écouté, même quand le canvas est caché,
-            // pour que la position soit à jour au prochain démarrage.
             window.addEventListener('pointermove', function (e) {
                 tx = e.clientX;
                 ty = e.clientY;
@@ -796,32 +786,26 @@
                 ty = -9999;
             });
 
-            // Resize debouncé : évite de redimensionner 60 fois pendant
-            // un drag de fenêtre, et absorbe les changements de barre d'URL iOS.
             var resizeTimer;
             window.addEventListener('resize', function () {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(sync, 150);
             });
 
-            // Réagit aux changements de media query en cours de session
-            // (l'utilisateur active reduced-motion dans les réglages système).
             function watch(mq, cb) {
                 if (mq.addEventListener) mq.addEventListener('change', cb);
-                else mq.addListener(cb); // anciens navigateurs
+                else mq.addListener(cb);
             }
             watch(mqReduce, sync);
             watch(mqHover, sync);
             watch(mqData, sync);
 
-            // Premier démarrage.
             sync();
         })();
 
         /* =========================================================
            3. Magic Bento — spotlight, lueur, magnétisme, ripple
-           Les effets de curseur ne s'activent que sur pointeur fin.
-           Le ripple est universel (sauf reduced-motion).
+           S'applique à toutes les cartes, section principale incluse.
            ========================================================= */
         (function () {
             var hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -832,7 +816,6 @@
             function lerp(a, b, k) { return a + (b - a) * k; }
 
             cards.forEach(function (card) {
-                // --- Effets de curseur (desktop uniquement) ---
                 if (hasFinePointer && !reduceMotion) {
                     var rect = null;
                     var rafId = 0;
@@ -889,7 +872,6 @@
                     });
                 }
 
-                // --- Ripple au clic (toutes plateformes sauf reduced-motion) ---
                 card.addEventListener('click', function (e) {
                     if (reduceMotion) return;
 

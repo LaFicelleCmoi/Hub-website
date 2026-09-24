@@ -29,6 +29,7 @@
             --icon-color: #4B5563;
 
             --shadow-hover: 0 4px 20px -6px rgba(0, 0, 0, 0.10);
+            --shadow-nav: 0 4px 24px -8px rgba(0, 0, 0, 0.10);
             --bento-rgb: 120, 90, 220;
             --bento-spot: rgba(var(--bento-rgb), 0.06);
             --bento-edge: rgba(var(--bento-rgb), 0.45);
@@ -67,6 +68,7 @@
                 --text-muted: #8F8F8F;
                 --icon-color: #A1A1AA;
                 --shadow-hover: 0 4px 20px -6px rgba(255, 255, 255, 0.04);
+                --shadow-nav: 0 4px 24px -8px rgba(255, 255, 255, 0.05);
                 --bento-spot: rgba(var(--bento-rgb), 0.10);
             }
         }
@@ -76,13 +78,6 @@
                 --border-color: #B8B8B8;
                 --border-hover: #6B7280;
                 --text-muted: #4B5563;
-            }
-            @media (prefers-color-scheme: dark) {
-                :root {
-                    --border-color: #4B4B4B;
-                    --border-hover: #888888;
-                    --text-muted: #B0B0B0;
-                }
             }
         }
 
@@ -106,7 +101,9 @@
             overflow-x: clip;
         }
 
-        /* ---------- Dot Field ---------- */
+        /* =========================================================
+           Dot Field (fond)
+           ========================================================= */
         #dotfield {
             position: fixed;
             inset: 0;
@@ -132,7 +129,194 @@
             }
         }
 
-        /* ---------- Skip link ---------- */
+        /* =========================================================
+           CardNav — navigation en haut
+           ========================================================= */
+        .card-nav-container {
+            position: fixed;
+            top: max(1.25rem, env(safe-area-inset-top, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(92%, 800px);
+            z-index: 50;
+            box-sizing: border-box;
+        }
+
+        .card-nav {
+            display: grid;
+            grid-template-rows: 60px 0fr;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-nav);
+            overflow: hidden;
+            transition: grid-template-rows 0.4s var(--ease-out), border-color 0.2s ease;
+            will-change: grid-template-rows;
+        }
+
+        .card-nav.open {
+            grid-template-rows: 60px 1fr;
+        }
+
+        .card-nav-top {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 0.625rem 0 0.875rem;
+            height: 60px;
+            z-index: 2;
+        }
+
+        /* Hamburger */
+        .hamburger-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-main);
+            border-radius: 6px;
+            transition: background-color 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hamburger-menu:hover {
+            background-color: rgba(var(--bento-rgb), 0.06);
+        }
+        .hamburger-menu:focus-visible {
+            outline: 2px solid var(--text-main);
+            outline-offset: 2px;
+        }
+
+        .hamburger-line {
+            width: 22px;
+            height: 2px;
+            background-color: currentColor;
+            border-radius: 1px;
+            transition:
+                transform 0.3s var(--ease-out),
+                opacity 0.2s ease;
+            transform-origin: 50% 50%;
+        }
+
+        .hamburger-menu[aria-expanded="true"] .hamburger-line:first-child {
+            transform: translateY(4px) rotate(45deg);
+        }
+        .hamburger-menu[aria-expanded="true"] .hamburger-line:last-child {
+            transform: translateY(-4px) rotate(-45deg);
+        }
+
+        /* Logo — centré absolument */
+        .logo-container {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .logo {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            color: var(--text-main);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        /* Contenu dépliable */
+        .card-nav-content {
+            min-height: 0;
+            overflow: hidden;
+            display: flex;
+            gap: 8px;
+            padding: 0 0.5rem 0.5rem;
+        }
+
+        .nav-card {
+            flex: 1 1 0;
+            min-width: 0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: rgba(120, 90, 220, 0.06);
+            border: 1px solid var(--border-color);
+
+            /* État initial : décalé vers le bas, invisible */
+            opacity: 0;
+            transform: translateY(14px);
+            transition:
+                opacity 0.3s var(--ease-out),
+                transform 0.3s var(--ease-out);
+        }
+
+        .nav-card[data-tint="violet"] { background-color: rgba(120, 90, 220, 0.06); }
+        .nav-card[data-tint="blue"]   { background-color: rgba(59, 130, 246, 0.06); }
+        .nav-card[data-tint="amber"]  { background-color: rgba(245, 158, 11, 0.06); }
+
+        @media (prefers-color-scheme: dark) {
+            .nav-card[data-tint="violet"] { background-color: rgba(120, 90, 220, 0.12); }
+            .nav-card[data-tint="blue"]   { background-color: rgba(59, 130, 246, 0.12); }
+            .nav-card[data-tint="amber"]  { background-color: rgba(245, 158, 11, 0.12); }
+        }
+
+        /* État ouvert : remonté à sa place, avec stagger */
+        .card-nav.open .nav-card {
+            opacity: 1;
+            transform: none;
+        }
+        .card-nav.open .nav-card:nth-child(1) { transition-delay: 0.10s; }
+        .card-nav.open .nav-card:nth-child(2) { transition-delay: 0.17s; }
+        .card-nav.open .nav-card:nth-child(3) { transition-delay: 0.24s; }
+
+        .nav-card-label {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            color: var(--text-main);
+        }
+
+        .nav-card-links {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: auto;
+        }
+
+        .nav-card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 3px 0;
+            border-radius: 4px;
+            transition: color 0.15s ease, opacity 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .nav-card-link:hover {
+            color: var(--text-main);
+        }
+        .nav-card-link:focus-visible {
+            outline: 2px solid var(--text-main);
+            outline-offset: 2px;
+        }
+        .nav-card-link svg {
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+
+        /* =========================================================
+           Skip link
+           ========================================================= */
         .skip-link {
             position: absolute;
             left: max(1rem, env(safe-area-inset-left, 0px));
@@ -150,7 +334,9 @@
         }
         .skip-link:focus { transform: translateY(0); }
 
-        /* ---------- Wrapper ---------- */
+        /* =========================================================
+           Page wrapper — décalé pour laisser la place au CardNav
+           ========================================================= */
         .page-wrapper {
             position: relative;
             z-index: 1;
@@ -160,12 +346,14 @@
             flex-grow: 1;
             padding-left:   max(var(--pad-x), env(safe-area-inset-left, 0px));
             padding-right:  max(var(--pad-x), env(safe-area-inset-right, 0px));
-            padding-top:    calc(var(--pad-y-top) + env(safe-area-inset-top, 0px));
+            /* Le CardNav occupe environ 84px du haut → on ajoute 5.5rem
+               au padding-top habituel, plus la safe-area iOS. */
+            padding-top:    calc(var(--pad-y-top) + 5.5rem + env(safe-area-inset-top, 0px));
             padding-bottom: calc(var(--pad-y-bottom) + env(safe-area-inset-bottom, 0px));
         }
 
         /* =========================================================
-           Header — texte à gauche, bascule à droite
+           Header
            ========================================================= */
         header {
             display: flex;
@@ -178,8 +366,6 @@
         .header-text {
             max-width: 600px;
             min-width: 0;
-            /* Évite que le header "saute" en hauteur quand la
-               description change de longueur entre les vues. */
             min-height: 5.5em;
         }
 
@@ -199,14 +385,12 @@
             font-weight: 400;
             text-wrap: pretty;
             overflow-wrap: break-word;
-            /* Léger fondu lors du changement de texte */
             transition: opacity 200ms ease;
         }
         header p.is-swapping {
             opacity: 0.35;
         }
 
-        /* ---------- Bouton bascule ---------- */
         .header-cta {
             display: inline-flex;
             align-items: center;
@@ -245,7 +429,6 @@
             transition: transform 300ms var(--ease-out), color var(--transition-speed) ease;
         }
 
-        /* En vue "projets", l'icône pivote pour pointer vers le haut. */
         .header-cta[data-target="sports"] .header-cta-icon {
             transform: rotate(180deg);
         }
@@ -267,49 +450,41 @@
             }
         }
 
-        .header-cta:active {
-            transform: translateY(0);
-        }
-
+        .header-cta:active { transform: translateY(0); }
         .header-cta:focus-visible {
             outline: 2px solid var(--text-main);
             outline-offset: 3px;
         }
 
         /* =========================================================
-           Vues — sections interchangeables
+           Vues
            ========================================================= */
         .view {
             transition:
                 opacity var(--view-duration) var(--ease-out),
                 transform var(--view-duration) var(--ease-out);
         }
-
-        /* Sortie : fondu vers le haut */
         .view.is-leaving {
             opacity: 0;
             transform: translateY(-8px);
         }
-
-        /* Entrée : état initial appliqué instantanément, puis relâché
-           pour déclencher la transition vers l'état naturel. */
         .view.is-entering {
             opacity: 0;
             transform: translateY(8px);
             transition: none;
         }
 
-        /* ---------- Grille ---------- */
         .grid {
             list-style: none;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
             gap: var(--grid-gap);
         }
-
         .grid > li { min-width: 0; }
 
-        /* ---------- Carte bento ---------- */
+        /* =========================================================
+           Carte bento
+           ========================================================= */
         .card {
             --mx: 50%;
             --my: 50%;
@@ -490,29 +665,23 @@
             overflow-wrap: break-word;
         }
 
-        /* ---------- Grille projets : cartes plus compactes ---------- */
         .grid--projects {
             grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
         }
-
         .grid--projects .card {
             padding: clamp(1rem, 2.5vw, 1.25rem);
         }
-
         .grid--projects .icon-wrapper {
             width: 36px;
             height: 36px;
         }
-
         .grid--projects .card-header {
             margin-bottom: 0.875rem;
         }
-
         .grid--projects .card h2 {
             font-size: 1rem;
         }
 
-        /* ---------- Apparition échelonnée des cartes ---------- */
         @media (prefers-reduced-motion: no-preference) {
             .view.is-active .grid > li {
                 animation: fade-up 0.5s var(--ease-out) backwards;
@@ -532,20 +701,36 @@
         /* =========================================================
            Breakpoints
            ========================================================= */
+        @media (max-width: 768px) {
+            .card-nav-content {
+                flex-direction: column;
+                gap: 6px;
+                /* Limite la hauteur au cas où la liste serait très longue */
+                max-height: calc(80vh - 60px);
+                overflow-y: auto;
+            }
+            .nav-card {
+                flex: 1 1 auto;
+                padding: 12px 14px;
+            }
+            .nav-card-links {
+                margin-top: 4px;
+            }
+        }
+
         @media (max-width: 640px) {
             header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1.25rem;
             }
-            .header-text {
-                min-height: 0;
-            }
+            .header-text { min-height: 0; }
             .header-cta {
                 margin-top: 0;
                 align-self: stretch;
                 justify-content: center;
             }
+            .logo { font-size: 0.875rem; }
         }
 
         @media (max-width: 360px) {
@@ -559,6 +744,7 @@
                 width: 36px;
                 height: 36px;
             }
+            .logo { font-size: 0.8125rem; }
         }
 
         @media (orientation: landscape) and (max-height: 500px) {
@@ -574,7 +760,6 @@
             }
         }
 
-        /* ---------- Reduced motion ---------- */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -594,6 +779,79 @@
 <body>
 
     <canvas id="dotfield" aria-hidden="true"></canvas>
+
+    <!-- ============================================
+         CardNav — navigation principale
+         ============================================ -->
+    <div class="card-nav-container">
+        <nav class="card-nav" id="card-nav" aria-label="Navigation principale">
+            <div class="card-nav-top">
+                <button type="button"
+                        class="hamburger-menu"
+                        id="nav-hamburger"
+                        aria-expanded="false"
+                        aria-controls="nav-content"
+                        aria-label="Ouvrir le menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+
+                <div class="logo-container">
+                    <span class="logo">DataSport Hub</span>
+                </div>
+            </div>
+
+            <div class="card-nav-content" id="nav-content" aria-hidden="true">
+
+                <div class="nav-card" data-tint="violet">
+                    <div class="nav-card-label">Compétitions</div>
+                    <div class="nav-card-links">
+                        <a class="nav-card-link" href="https://f1-2026-gamma.vercel.app" target="_blank" rel="noopener noreferrer">
+                            <i data-lucide="arrow-up-right" width="14" height="14" aria-hidden="true"></i>
+                            Formule 1
+                        </a>
+                        <a class="nav-card-link" href="https://cdm-hazel.vercel.app/dashboard.html" target="_blank" rel="noopener noreferrer">
+                            <i data-lucide="arrow-up-right" width="14" height="14" aria-hidden="true"></i>
+                            Coupe du Monde
+                        </a>
+                        <a class="nav-card-link" href="https://ldc-2026-2027.vercel.app" target="_blank" rel="noopener noreferrer">
+                            <i data-lucide="arrow-up-right" width="14" height="14" aria-hidden="true"></i>
+                            Ligue des Champions
+                        </a>
+                    </div>
+                </div>
+
+                <div class="nav-card" data-tint="blue">
+                    <div class="nav-card-label">Portails</div>
+                    <div class="nav-card-links">
+                        <a class="nav-card-link" href="https://league-hub-teal.vercel.app" target="_blank" rel="noopener noreferrer">
+                            <i data-lucide="arrow-up-right" width="14" height="14" aria-hidden="true"></i>
+                            League Hub
+                        </a>
+                        <a class="nav-card-link" href="https://nba-hub-ten.vercel.app" target="_blank" rel="noopener noreferrer">
+                            <i data-lucide="arrow-up-right" width="14" height="14" aria-hidden="true"></i>
+                            NBA Hub
+                        </a>
+                    </div>
+                </div>
+
+                <div class="nav-card" data-tint="amber">
+                    <div class="nav-card-label">Side projects</div>
+                    <div class="nav-card-links">
+                        <a class="nav-card-link" href="https://casino-black-rust.vercel.app/#/" target="_blank" rel="noopener noreferrer">
+                            <i data-lucide="arrow-up-right" width="14" height="14" aria-hidden="true"></i>
+                            Casino Engine
+                        </a>
+                        <a class="nav-card-link" href="https://qr-studio-navy.vercel.app/" target="_blank" rel="noopener noreferrer">
+                            <i data-lucide="arrow-up-right" width="14" height="14" aria-hidden="true"></i>
+                            QR Studio
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </nav>
+    </div>
 
     <a href="#main" class="skip-link">Aller au contenu</a>
 
@@ -623,16 +881,13 @@
 
         <main id="main">
 
-            <!-- ============================================
-                 Vue 1 — Environnements sportifs
-                 ============================================ -->
+            <!-- Vue 1 — Environnements sportifs -->
             <section class="view is-active"
                      data-view="sports"
                      id="view-sports"
                      aria-label="Environnements sportifs">
 
                 <ul class="grid">
-
                     <li>
                         <a href="https://f1-2026-gamma.vercel.app" class="card" target="_blank" rel="noopener noreferrer">
                             <div class="card-header">
@@ -705,13 +960,10 @@
                             <p>Analytique et suivi des franchises de basketball nord-américain.</p>
                         </a>
                     </li>
-
                 </ul>
             </section>
 
-            <!-- ============================================
-                 Vue 2 — Autres projets
-                 ============================================ -->
+            <!-- Vue 2 — Autres projets -->
             <section class="view"
                      data-view="projects"
                      id="view-projects"
@@ -719,7 +971,6 @@
                      hidden>
 
                 <ul class="grid grid--projects">
-
                     <li>
                         <a href="https://casino-black-rust.vercel.app/#/" class="card" target="_blank" rel="noopener noreferrer">
                             <div class="card-header">
@@ -745,7 +996,6 @@
                             <p>Générateur et scanner de QR codes — types de contenu variés, personnalisation, export PNG/SVG/PDF.</p>
                         </a>
                     </li>
-
                 </ul>
             </section>
 
@@ -754,20 +1004,77 @@
 
     <script>
         /* =========================================================
-           0. Lucide — garde-fou
+           0. Lucide
            ========================================================= */
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
         }
 
         /* =========================================================
-           1. Bascule de vue — sports ↔ projets
+           1. CardNav — ouverture/fermeture du menu
            ========================================================= */
         (function () {
-            var toggle    = document.getElementById('view-toggle');
-            var label     = document.getElementById('toggle-label');
-            var desc      = document.getElementById('header-description');
-            var sportsEl  = document.getElementById('view-sports');
+            var nav      = document.getElementById('card-nav');
+            var burger   = document.getElementById('nav-hamburger');
+            var content  = document.getElementById('nav-content');
+            if (!nav || !burger || !content) return;
+
+            var isOpen = false;
+
+            function open() {
+                if (isOpen) return;
+                isOpen = true;
+                nav.classList.add('open');
+                burger.setAttribute('aria-expanded', 'true');
+                burger.setAttribute('aria-label', 'Fermer le menu');
+                content.setAttribute('aria-hidden', 'false');
+            }
+
+            function close() {
+                if (!isOpen) return;
+                isOpen = false;
+                nav.classList.remove('open');
+                burger.setAttribute('aria-expanded', 'false');
+                burger.setAttribute('aria-label', 'Ouvrir le menu');
+                content.setAttribute('aria-hidden', 'true');
+            }
+
+            function toggle() {
+                if (isOpen) close();
+                else open();
+            }
+
+            burger.addEventListener('click', toggle);
+
+            /* Échap ferme le menu et rend le focus au bouton. */
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && isOpen) {
+                    close();
+                    burger.focus();
+                }
+            });
+
+            /* Clic en dehors : ferme, sauf si on clique dans le nav. */
+            document.addEventListener('click', function (e) {
+                if (!isOpen) return;
+                if (nav.contains(e.target)) return;
+                close();
+            });
+
+            /* Ferme automatiquement quand on clique sur un lien du menu. */
+            content.addEventListener('click', function (e) {
+                if (e.target.closest('a')) close();
+            });
+        })();
+
+        /* =========================================================
+           2. Bascule de vue — sports ↔ projets
+           ========================================================= */
+        (function () {
+            var toggle     = document.getElementById('view-toggle');
+            var label      = document.getElementById('toggle-label');
+            var desc       = document.getElementById('header-description');
+            var sportsEl   = document.getElementById('view-sports');
             var projectsEl = document.getElementById('view-projects');
 
             if (!toggle || !sportsEl || !projectsEl) return;
@@ -778,50 +1085,37 @@
                 sports: {
                     label: 'Autres projets',
                     description: 'Accès direct à vos environnements de données et tableaux de bord sportifs.',
-                    // Le bouton envoie vers la vue projets
                     buttonTarget: 'projects'
                 },
                 projects: {
                     label: 'Retour aux sports',
                     description: 'Expérimentations et side projects hors du périmètre sportif.',
-                    // Le bouton renvoie vers la vue sports
                     buttonTarget: 'sports'
                 }
             };
 
-            // État courant, aligné sur le hash de l'URL au chargement.
             var current = (location.hash === '#projects') ? 'projects' : 'sports';
 
             function getView(name) {
                 return name === 'sports' ? sportsEl : projectsEl;
             }
 
-            /* Applique l'état visuel sans animer — utilisé au chargement
-               et lors d'une navigation via l'historique. */
             function applyImmediate(target) {
                 sportsEl.hidden   = target !== 'sports';
                 projectsEl.hidden = target !== 'projects';
-
                 sportsEl.classList.toggle('is-active', target === 'sports');
                 projectsEl.classList.toggle('is-active', target === 'projects');
-
-                // Purge les classes transitoires au cas où.
                 sportsEl.classList.remove('is-leaving', 'is-entering');
                 projectsEl.classList.remove('is-leaving', 'is-entering');
-
                 updateChrome(target);
                 current = target;
             }
 
-            /* Bascule animée : fade out → swap → fade in. */
             function switchTo(target) {
                 if (target === current) return;
-
                 var outgoing = getView(current);
                 var incoming = getView(target);
 
-                // Le libellé du bouton et la description changent
-                // immédiatement, mais avec un léger fondu sur la description.
                 updateChrome(target);
 
                 if (reduceMotion) {
@@ -829,96 +1123,64 @@
                     return;
                 }
 
-                // 1. Sortie
                 outgoing.classList.add('is-leaving');
 
-                // 2. Après la transition, swap réel.
-                //    On utilise un timer calé sur la durée CSS.
-                var duration = 280;
                 setTimeout(function () {
                     outgoing.hidden = true;
                     outgoing.classList.remove('is-leaving', 'is-active');
 
-                    // 3. Entrée : on force l'état initial, puis on le relâche
-                    //    au frame suivant pour déclencher la transition.
                     incoming.hidden = false;
                     incoming.classList.add('is-entering');
 
-                    // Reflow : garantit que le navigateur enregistre
-                    // l'état "opacity: 0" avant qu'on le retire.
                     void incoming.offsetWidth;
 
                     requestAnimationFrame(function () {
                         incoming.classList.remove('is-entering');
                         incoming.classList.add('is-active');
                     });
-                }, duration);
+                }, 280);
 
                 current = target;
             }
 
-            /* Met à jour le texte du header et l'état du bouton. */
             function updateChrome(target) {
                 var copy = COPY[target];
-
                 label.textContent = copy.label;
                 toggle.setAttribute('data-target', copy.buttonTarget);
 
-                // Léger fondu sur la description pendant le changement.
                 desc.classList.add('is-swapping');
-                // On repousse la mise à jour du texte au frame suivant,
-                // pour que le fondu soit perceptible.
                 requestAnimationFrame(function () {
                     desc.textContent = copy.description;
-                    // Retrait du fondu une fois le texte à jour.
                     requestAnimationFrame(function () {
                         desc.classList.remove('is-swapping');
                     });
                 });
             }
 
-            /* Synchronise l'URL. `push = false` remplace l'entrée courante
-               au lieu d'en créer une nouvelle (utile pour popstate). */
             function syncURL(target, push) {
                 var hash = target === 'projects' ? '#projects' : '';
                 var url = location.pathname + location.search + hash;
-
-                if (push) {
-                    history.pushState({ view: target }, '', url);
-                }
+                if (push) history.pushState({ view: target }, '', url);
             }
 
-            /* Clic sur le bouton : bascule vers la vue opposée. */
             toggle.addEventListener('click', function () {
                 var target = (current === 'sports') ? 'projects' : 'sports';
                 syncURL(target, true);
                 switchTo(target);
             });
 
-            /* Bouton précédent/suivant du navigateur. */
             window.addEventListener('popstate', function (e) {
                 var target = (e.state && e.state.view)
                     ? e.state.view
                     : (location.hash === '#projects' ? 'projects' : 'sports');
-
-                if (target !== current) {
-                    switchTo(target);
-                }
+                if (target !== current) switchTo(target);
             });
 
-            /* État initial : si l'URL contient #projects, on bascule
-               immédiatement sans animation et sans nouvelle entrée
-               dans l'historique. */
-            if (current === 'projects') {
-                applyImmediate('projects');
-            } else {
-                // S'assure que les classes sont cohérentes au démarrage.
-                applyImmediate('sports');
-            }
+            applyImmediate(current);
         })();
 
         /* =========================================================
-           2. Dot Field
+           3. Dot Field
            ========================================================= */
         (function () {
             var canvas = document.getElementById('dotfield');
@@ -1083,7 +1345,7 @@
         })();
 
         /* =========================================================
-           3. Magic Bento
+           4. Magic Bento — cartes principales uniquement
            ========================================================= */
         (function () {
             var hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;

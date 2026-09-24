@@ -103,7 +103,6 @@
             overflow-x: clip;
         }
 
-        /* ---------- Dot Field ---------- */
         #dotfield {
             position: fixed;
             inset: 0;
@@ -129,7 +128,6 @@
             }
         }
 
-        /* ---------- Skip link ---------- */
         .skip-link {
             position: absolute;
             left: max(1rem, env(safe-area-inset-left, 0px));
@@ -147,7 +145,6 @@
         }
         .skip-link:focus { transform: translateY(0); }
 
-        /* ---------- Wrapper ---------- */
         .page-wrapper {
             position: relative;
             z-index: 1;
@@ -161,7 +158,6 @@
             padding-bottom: calc(var(--pad-y-bottom) + env(safe-area-inset-bottom, 0px));
         }
 
-        /* ---------- Header principal ---------- */
         header {
             margin-bottom: var(--header-gap);
             max-width: 600px;
@@ -185,7 +181,6 @@
             overflow-wrap: break-word;
         }
 
-        /* ---------- Grille ---------- */
         .grid {
             list-style: none;
             display: grid;
@@ -195,7 +190,6 @@
 
         .grid > li { min-width: 0; }
 
-        /* ---------- Carte bento ---------- */
         .card {
             --mx: 50%;
             --my: 50%;
@@ -298,7 +292,6 @@
             .card:active { filter: none; }
         }
 
-        /* ---------- Ripple ---------- */
         .ripple {
             position: absolute;
             width: 8px;
@@ -317,7 +310,6 @@
             to { transform: scale(28); opacity: 0; }
         }
 
-        /* ---------- Contenu des cartes ---------- */
         .card-header {
             display: flex;
             align-items: center;
@@ -378,10 +370,6 @@
             overflow-wrap: break-word;
         }
 
-        /* =========================================================
-           Section secondaire — « Autres projets »
-           Distincte visuellement, cohérente dans le langage.
-           ========================================================= */
         .section-divider {
             margin-top: var(--section-gap);
             padding-top: clamp(2rem, 4vw, 3rem);
@@ -405,7 +393,6 @@
             color: var(--text-main);
         }
 
-        /* Petit trait décoratif avant le titre de section — très discret */
         .section-header h2::before {
             content: '';
             display: inline-block;
@@ -422,7 +409,6 @@
             text-wrap: pretty;
         }
 
-        /* La grille de projets est légèrement plus compacte */
         .grid--projects {
             grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
         }
@@ -444,9 +430,6 @@
             font-size: 1rem;
         }
 
-        /* =========================================================
-           Apparition échelonnée
-           ========================================================= */
         @media (prefers-reduced-motion: no-preference) {
             .grid > li {
                 animation: fade-up 0.5s var(--ease-out) backwards;
@@ -458,6 +441,7 @@
             .grid > li:nth-child(5) { animation-delay: 200ms; }
 
             .grid--projects > li:nth-child(1) { animation-delay: 300ms; }
+            .grid--projects > li:nth-child(2) { animation-delay: 350ms; }
         }
 
         @keyframes fade-up {
@@ -465,9 +449,6 @@
             to   { opacity: 1; transform: none; }
         }
 
-        /* =========================================================
-           Breakpoints
-           ========================================================= */
         @media (max-width: 360px) {
             :root {
                 --pad-x: 0.875rem;
@@ -520,9 +501,7 @@
 
         <main id="main">
 
-            <!-- ============================================
-                 Section principale — environnements sportifs
-                 ============================================ -->
+            <!-- Section principale — environnements sportifs -->
             <ul class="grid" aria-label="Environnements sportifs">
 
                 <li>
@@ -600,9 +579,7 @@
 
             </ul>
 
-            <!-- ============================================
-                 Section secondaire — autres projets
-                 ============================================ -->
+            <!-- Section secondaire — autres projets -->
             <section class="section-divider" aria-labelledby="projects-title">
                 <div class="section-header">
                     <h2 id="projects-title">Autres projets</h2>
@@ -624,6 +601,19 @@
                         </a>
                     </li>
 
+                    <li>
+                        <a href="https://qr-studio-navy.vercel.app/" class="card" target="_blank" rel="noopener noreferrer">
+                            <div class="card-header">
+                                <div class="icon-wrapper" aria-hidden="true">
+                                    <i data-lucide="qr-code"></i>
+                                </div>
+                                <i data-lucide="arrow-up-right" class="arrow-icon" width="20" height="20" aria-hidden="true"></i>
+                            </div>
+                            <h2>QR Studio <span class="card-tag">Outil</span></h2>
+                            <p>Générateur et scanner de QR codes — types de contenu variés, personnalisation, export PNG/SVG/PDF.</p>
+                        </a>
+                    </li>
+
                 </ul>
             </section>
 
@@ -631,16 +621,12 @@
     </div>
 
     <script>
-        /* =========================================================
-           1. Lucide — garde-fou
-           ========================================================= */
+        /* 1. Lucide */
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
         }
 
-        /* =========================================================
-           2. Dot Field — canvas avec cycle de vie propre
-           ========================================================= */
+        /* 2. Dot Field */
         (function () {
             var canvas = document.getElementById('dotfield');
             if (!canvas) return;
@@ -803,10 +789,7 @@
             sync();
         })();
 
-        /* =========================================================
-           3. Magic Bento — spotlight, lueur, magnétisme, ripple
-           S'applique à toutes les cartes, section principale incluse.
-           ========================================================= */
+        /* 3. Magic Bento */
         (function () {
             var hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
             var reduceMotion   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

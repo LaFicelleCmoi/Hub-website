@@ -646,11 +646,19 @@
 
         /* =========================================================
            Footer — Glass Icons
+           Masqué par défaut (desktop), révélé sous 768px.
            ========================================================= */
         .glass-footer {
-            margin-top: var(--footer-gap);
-            padding-top: clamp(2rem, 4vw, 3rem);
-            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .glass-footer {
+                display: block;
+                margin-top: var(--footer-gap);
+                padding-top: clamp(2rem, 4vw, 3rem);
+                border-top: 1px solid var(--border-color);
+            }
         }
 
         .footer-header {
@@ -701,11 +709,8 @@
         @media (min-width: 720px) {
             .icon-btns { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         }
-        @media (min-width: 1000px) {
-            .icon-btns { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-        }
 
-        /* La pastille elle-même */
+        /* La pastille */
         .icon-btn {
             background-color: transparent;
             outline: none;
@@ -772,7 +777,6 @@
             }
         }
 
-        /* Navigateurs sans backdrop-filter : on renforce l'opacité */
         @supports not (backdrop-filter: blur(1px)) {
             .icon-btn__front { background-color: rgba(255, 255, 255, 0.85); }
             @media (prefers-color-scheme: dark) {
@@ -821,7 +825,6 @@
             pointer-events: none;
         }
 
-        /* États hover / focus */
         .icon-btn:focus-visible .icon-btn__back,
         .icon-btn:hover .icon-btn__back {
             transform: rotate(25deg) translate3d(-0.5em, -0.5em, 0.5em);
@@ -843,14 +846,12 @@
             outline: none;
         }
 
-        /* Focus clavier visible sur la pastille avant */
         .icon-btn:focus-visible .icon-btn__front {
             box-shadow:
                 0 0 0 0.1em rgba(255, 255, 255, 0.6) inset,
                 0 0 0 0.15em var(--text-main);
         }
 
-        /* Écrans tactiles : on garde l'effet au tap */
         @media (hover: none) {
             .icon-btn:active .icon-btn__back {
                 transform: rotate(25deg) translate3d(-0.5em, -0.5em, 0.5em);
@@ -1178,7 +1179,7 @@
         </main>
 
         <!-- ============================================
-             Footer — Glass Icons
+             Footer — Glass Icons (mobile uniquement)
              ============================================ -->
         <footer class="glass-footer" aria-labelledby="footer-title">
             <div class="footer-header">
@@ -1194,7 +1195,7 @@
                     <span class="icon-btn__front">
                         <span class="icon-btn__icon"><i data-lucide="flag"></i></span>
                     </span>
-                    <span class="icon-btn__label">Formule 1</span>
+                    <span class="icon-btn__label" aria-hidden="true">Formule 1</span>
                 </a>
 
                 <a href="https://cdm-hazel.vercel.app/dashboard.html" class="icon-btn" role="listitem"
@@ -1203,7 +1204,7 @@
                     <span class="icon-btn__front">
                         <span class="icon-btn__icon"><i data-lucide="globe-2"></i></span>
                     </span>
-                    <span class="icon-btn__label">Coupe du Monde</span>
+                    <span class="icon-btn__label" aria-hidden="true">Coupe du Monde</span>
                 </a>
 
                 <a href="https://ldc-2026-2027.vercel.app" class="icon-btn" role="listitem"
@@ -1212,7 +1213,7 @@
                     <span class="icon-btn__front">
                         <span class="icon-btn__icon"><i data-lucide="trophy"></i></span>
                     </span>
-                    <span class="icon-btn__label">Ligue des Champions</span>
+                    <span class="icon-btn__label" aria-hidden="true">Ligue des Champions</span>
                 </a>
 
                 <a href="https://league-hub-teal.vercel.app" class="icon-btn" role="listitem"
@@ -1221,7 +1222,7 @@
                     <span class="icon-btn__front">
                         <span class="icon-btn__icon"><i data-lucide="network"></i></span>
                     </span>
-                    <span class="icon-btn__label">League Hub</span>
+                    <span class="icon-btn__label" aria-hidden="true">League Hub</span>
                 </a>
 
                 <a href="https://nba-hub-ten.vercel.app" class="icon-btn" role="listitem"
@@ -1240,7 +1241,7 @@
                             </svg>
                         </span>
                     </span>
-                    <span class="icon-btn__label">NBA Hub</span>
+                    <span class="icon-btn__label" aria-hidden="true">NBA Hub</span>
                 </a>
 
                 <a href="https://casino-black-rust.vercel.app/#/" class="icon-btn" role="listitem"
@@ -1249,7 +1250,7 @@
                     <span class="icon-btn__front">
                         <span class="icon-btn__icon"><i data-lucide="dice-5"></i></span>
                     </span>
-                    <span class="icon-btn__label">Casino Engine</span>
+                    <span class="icon-btn__label" aria-hidden="true">Casino Engine</span>
                 </a>
 
                 <a href="https://qr-studio-navy.vercel.app/" class="icon-btn" role="listitem"
@@ -1258,7 +1259,7 @@
                     <span class="icon-btn__front">
                         <span class="icon-btn__icon"><i data-lucide="qr-code"></i></span>
                     </span>
-                    <span class="icon-btn__label">QR Studio</span>
+                    <span class="icon-btn__label" aria-hidden="true">QR Studio</span>
                 </a>
 
             </div>
